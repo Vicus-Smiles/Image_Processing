@@ -1,0 +1,409 @@
+================================================================================
+TP1: CONTRAST CORRECTION
+================================================================================
+
+STUDENT INFORMATION:
+--------------------------------------------------------------------------------
+Name: [Your Name]
+ID: [Your ID]
+Date: December 10, 2025
+
+================================================================================
+1. BRIEF EXPLANATION OF WHAT YOU DID
+================================================================================
+
+This work implements and tests three contrast correction methods:
+
+METHOD 1: LINEAR TRANSFORMATION
+─────────────────────────────────
+Formula: g(x,y) = a·f(x,y) + c
+
+Where:
+  • f(x,y) = input pixel intensity at position (x,y)
+  • g(x,y) = output enhanced pixel
+  • a = contrast multiplier
+    - a > 1: increases contrast (stretches pixel values)
+    - 0 < a < 1: decreases contrast (compresses pixel values)
+  • c = brightness offset
+    - c > 0: increases brightness (shifts histogram right)
+    - c < 0: decreases brightness (shifts histogram left)
+
+Implementation: Custom implementation in Python using NumPy arrays
+Values clipped to [0, 255] range to prevent overflow
+
+METHOD 2: GAMMA CORRECTION
+──────────────────────────
+Formula: g(x,y) = 255 × [f(x,y)/255]^(1/γ)
+
+Where:
+  • γ (gamma) is the correction parameter
+  • γ < 1: brightening transformation (e.g., 0.5)
+    - Non-linear brightening
+    - Dark areas brighten more than bright areas
+  • γ > 1: darkening transformation (e.g., 2.0)
+    - Non-linear darkening
+    - Bright areas darken more than dark areas
+  • γ = 1: no transformation
+
+Implementation: Custom implementation using power function
+No clipping needed (stays naturally in [0, 255] range)
+Produces more natural-looking results than linear transformation
+
+METHOD 3: HISTOGRAM EQUALIZATION
+────────────────────────────────
+Formula: g(x,y) = (L-1) × CDF[f(x,y)]
+
+Where:
+  • CDF = Cumulative Distribution Function of the histogram
+  • L = number of intensity levels (256 for 8-bit image)
+  • CDF transforms pixel values to spread across full range
+
+Implementation: OpenCV function cv2.equalizeHist()
+Automatic method: no parameters to adjust
+Stretches histogram to use maximum dynamic range [0, 255]
+
+TESTING APPROACH:
+─────────────────
+For each of the 4 images:
+  • 3 linear transformations with different (a, c) values
+  • 3 gamma corrections with different γ values
+  • 1 histogram equalization (automatic)
+  • Total: 7 results per image to show parameter influence
+
+Purpose: Demonstrate how different parameter values affect image
+quality and histogram distribution
+
+================================================================================
+2. VISUALIZATION OF THE RESULTS OBTAINED
+================================================================================
+
+Each result PNG file contains:
+  • Left column: Enhanced image
+  • Right column: Histogram of that image
+  • Row 0: Original image + original histogram (reference)
+  • Rows 1-3: Linear transformations with parameter values
+  • Rows 4-6: Gamma corrections with parameter values
+  • Row 7: Histogram equalization (automatic)
+
+
+--------------------------------------------------------------------------------
+IMAGE 1: Foggy Forest - Deer
+--------------------------------------------------------------------------------
+
+File: image1.jpg
+Type: dark_low_contrast
+Description: Very dark and foggy image with low contrast
+Output file: image1_results.png
+
+RESULTS OBTAINED:
+
+LINEAR TRANSFORMATIONS:
+
+  [1] a=1.2, c=0 (Gentle Contrast)
+      Formula: g(x,y) = 1.2·f(x,y) + 0
+
+  [2] a=1.0, c=30 (Brightness Only)
+      Formula: g(x,y) = 1.0·f(x,y) + 30
+
+  [3] a=1.3, c=20 (Balanced)
+      Formula: g(x,y) = 1.3·f(x,y) + 20
+
+
+GAMMA CORRECTIONS:
+
+  [1] γ=0.5 (Strong Brightening ⭐)
+      Formula: g(x,y) = 255 × [f(x,y)/255]^(1/0.5)
+
+  [2] γ=0.67 (Moderate Brightening)
+      Formula: g(x,y) = 255 × [f(x,y)/255]^(1/0.67)
+
+  [3] γ=0.4 (Extreme Brightening)
+      Formula: g(x,y) = 255 × [f(x,y)/255]^(1/0.4)
+
+
+HISTOGRAM EQUALIZATION:
+
+  [Auto] Automatic (no parameters)
+         Formula: g(x,y) = 255 × CDF[f(x,y)]
+
+
+--------------------------------------------------------------------------------
+IMAGE 2: Buildings - Urban Scene
+--------------------------------------------------------------------------------
+
+File: image2.jpg
+Type: normal_low_contrast
+Description: Medium brightness with low contrast buildings
+Output file: image2_results.png
+
+RESULTS OBTAINED:
+
+LINEAR TRANSFORMATIONS:
+
+  [1] a=1.2, c=0 (Contrast Increase)
+      Formula: g(x,y) = 1.2·f(x,y) + 0
+
+  [2] a=1.0, c=20 (Slight Brightening)
+      Formula: g(x,y) = 1.0·f(x,y) + 20
+
+  [3] a=1.1, c=15 (Balanced)
+      Formula: g(x,y) = 1.1·f(x,y) + 15
+
+
+GAMMA CORRECTIONS:
+
+  [1] γ=0.8 (Gentle Brightening)
+      Formula: g(x,y) = 255 × [f(x,y)/255]^(1/0.8)
+
+  [2] γ=0.9 (Slight Adjustment ⭐)
+      Formula: g(x,y) = 255 × [f(x,y)/255]^(1/0.9)
+
+  [3] γ=1.1 (Slight Darkening)
+      Formula: g(x,y) = 255 × [f(x,y)/255]^(1/1.1)
+
+
+HISTOGRAM EQUALIZATION:
+
+  [Auto] Automatic (no parameters)
+         Formula: g(x,y) = 255 × CDF[f(x,y)]
+
+
+--------------------------------------------------------------------------------
+IMAGE 3: Snowy Trees - Winter Landscape
+--------------------------------------------------------------------------------
+
+File: image3.jpg
+Type: bright_medium_contrast
+Description: Bright snowy scene with medium contrast
+Output file: image3_results.png
+
+RESULTS OBTAINED:
+
+LINEAR TRANSFORMATIONS:
+
+  [1] a=0.9, c=0 (Gentle Compression)
+      Formula: g(x,y) = 0.9·f(x,y) + 0
+
+  [2] a=0.8, c=-10 (Compression + Darkening)
+      Formula: g(x,y) = 0.8·f(x,y) + -10
+
+  [3] a=1.0, c=0 (No Change)
+      Formula: g(x,y) = 1.0·f(x,y) + 0
+
+
+GAMMA CORRECTIONS:
+
+  [1] γ=0.95 (Very Slight Brightening)
+      Formula: g(x,y) = 255 × [f(x,y)/255]^(1/0.95)
+
+  [2] γ=1.1 (Slight Darkening ⭐)
+      Formula: g(x,y) = 255 × [f(x,y)/255]^(1/1.1)
+
+  [3] γ=1.0 (No Change)
+      Formula: g(x,y) = 255 × [f(x,y)/255]^(1/1.0)
+
+
+HISTOGRAM EQUALIZATION:
+
+  [Auto] Automatic (no parameters)
+         Formula: g(x,y) = 255 × CDF[f(x,y)]
+
+
+--------------------------------------------------------------------------------
+IMAGE 4: Dark Room - Interior
+--------------------------------------------------------------------------------
+
+File: image4.jpg
+Type: very_dark_extreme
+Description: Extremely dark room with backlit window
+Output file: image4_results.png
+
+RESULTS OBTAINED:
+
+LINEAR TRANSFORMATIONS:
+
+  [1] a=1.5, c=0 (Strong Contrast)
+      Formula: g(x,y) = 1.5·f(x,y) + 0
+
+  [2] a=1.0, c=50 (Strong Brightness)
+      Formula: g(x,y) = 1.0·f(x,y) + 50
+
+  [3] a=2.0, c=30 (Maximum Enhancement)
+      Formula: g(x,y) = 2.0·f(x,y) + 30
+
+
+GAMMA CORRECTIONS:
+
+  [1] γ=0.4 (Extreme Brightening)
+      Formula: g(x,y) = 255 × [f(x,y)/255]^(1/0.4)
+
+  [2] γ=0.5 (Strong Brightening ⭐)
+      Formula: g(x,y) = 255 × [f(x,y)/255]^(1/0.5)
+
+  [3] γ=0.33 (Maximum Brightening)
+      Formula: g(x,y) = 255 × [f(x,y)/255]^(1/0.33)
+
+
+HISTOGRAM EQUALIZATION:
+
+  [Auto] Automatic (no parameters)
+         Formula: g(x,y) = 255 × CDF[f(x,y)]
+
+
+================================================================================
+3. FEEDBACK ON RESULTS OBTAINED
+================================================================================
+
+EFFECTS OF METHODS ON IMAGES:
+--------------------------------------------------------------------------------
+
+IMAGE 1 - FOGGY FOREST (Dark, Low Contrast):
+
+Original histogram characteristics:
+  • Concentrated in dark region (left side)
+  • Peak around 50-100 intensity values
+  • Very low contrast
+
+Linear Transformation effects:
+  • a=1.2, c=0: Histogram stretches, some clipping at 255
+  • a=1.0, c=30: Shifts histogram right, maintains shape
+  • a=1.3, c=20: Strong stretch + shift, more clipping
+
+Gamma Correction effects:
+  • γ=0.5: Strong brightening, histogram spreads nicely
+  • γ=0.67: Moderate brightening, good balance
+  • γ=0.4: Extreme brightening, very bright image
+
+Histogram Equalization: Stretches to full [0,255] range
+
+IMAGE 2 - BUILDINGS (Normal, Low Contrast):
+
+Original histogram characteristics:
+  • Medium concentration in mid-range
+  • Moderate contrast
+  • Some pixels across full range
+
+Linear Transformation effects:
+  • a=1.2, c=0: Increases contrast, histogram spreads
+  • a=1.0, c=20: Slight brightness increase
+  • a=1.1, c=15: Balanced enhancement
+
+Gamma Correction effects:
+  • γ=0.8: Slight brightening
+  • γ=0.9: Very subtle adjustment
+  • γ=1.1: Slight darkening
+
+Histogram Equalization: Good improvement for low-contrast scene
+
+IMAGE 3 - SNOWY TREES (Bright, Medium Contrast):
+
+Original histogram characteristics:
+  • Concentrated in bright region (right side)
+  • Already has decent contrast
+  • Washed-out appearance
+
+Linear Transformation effects:
+  • a=0.9, c=0: Slight compression, minimal change
+  • a=0.8, c=-10: More compression, darkens image
+  • a=1.0, c=0: No change (reference)
+
+Gamma Correction effects:
+  • γ=0.95: Minimal brightening
+  • γ=1.1: Slight darkening, improves appearance
+  • γ=1.0: No change (reference)
+
+Histogram Equalization: Limited benefit (already spread out)
+
+IMAGE 4 - DARK ROOM (Extreme Dark, Backlit):
+
+Original histogram characteristics:
+  • Almost entirely in dark region
+  • Only small spike from backlit window
+  • Extreme low contrast
+  • Most pixels nearly black (0-50)
+
+Linear Transformation effects:
+  • a=1.5, c=0: Strong stretch, significant brightening
+  • a=1.0, c=50: Adds brightness uniformly
+  • a=2.0, c=30: Maximum enhancement, reveals window detail
+
+Gamma Correction effects:
+  • γ=0.4: Extreme brightening, very effective
+  • γ=0.5: Strong brightening, good balance
+  • γ=0.33: Maximum brightening, window very prominent
+
+Histogram Equalization: Very effective, stretches entire range
+
+
+INFLUENCE OF PARAMETERS:
+--------------------------------------------------------------------------------
+
+LINEAR TRANSFORMATION PARAMETER INFLUENCE:
+
+Parameter 'a' (Contrast multiplier):
+  • INCREASING a: Histogram stretches (wider range)
+    - a=2.0: Stronger stretching, more clipping at edges
+    - a=1.5: Moderate stretching
+    - a=1.2: Gentle stretching
+    - a<1: Compression (opposite effect)
+  • Visible effect: Increased contrast in image
+
+Parameter 'c' (Brightness offset):
+  • INCREASING c: Histogram shifts right (brighter)
+    - c=50: Large rightward shift
+    - c=30: Moderate shift
+    - c=20: Gentle shift
+    - c<0: Leftward shift (darker)
+  • Visible effect: Overall brightness increase
+  • Warning: Large c values cause clipping at 255
+
+GAMMA CORRECTION PARAMETER INFLUENCE:
+
+Parameter 'γ' (Gamma value):
+  • DECREASING γ (γ<1): Non-linear brightening
+    - γ=0.4: Extreme brightening (largest effect)
+    - γ=0.5: Strong brightening
+    - γ=0.67: Moderate brightening
+    - γ=0.8: Gentle brightening
+  • INCREASING γ (γ>1): Non-linear darkening
+    - γ=1.1: Gentle darkening
+    - γ=1.5: Moderate darkening
+    - γ=2.0: Strong darkening
+    - γ=2.5: Extreme darkening
+  • Visible effect: Natural-looking brightness change
+  • Advantage: NO clipping at edges
+  • Key feature: Non-linear (dark areas change more)
+
+HISTOGRAM EQUALIZATION CHARACTERISTICS:
+
+  • No parameters: Fully automatic
+  • Effect: Spreads histogram to use entire [0,255] range
+  • CDF-based: Uses cumulative distribution function
+  • Best for: Extremely dark or bright images
+  • Limitation: Can amplify noise in uniform regions
+
+
+COMPARATIVE ANALYSIS:
+--------------------------------------------------------------------------------
+
+LINEAR vs GAMMA:
+  • Linear: Direct multiplication, simple but can clip
+  • Gamma: Non-linear, no clipping, more natural appearance
+  • Best choice: Gamma usually produces better visual results
+
+ALL METHODS vs HISTOGRAM EQUALIZATION:
+  • Manual methods: Precise control via parameters
+  • Equalization: Automatic, optimal histogram spread
+  • Equalization wins: For maximum contrast recovery
+  • Manual wins: For preserving specific image characteristics
+
+OPTIMAL PARAMETER SELECTIONS BY IMAGE TYPE:
+  • Very dark images: γ<1 (e.g., 0.4-0.5) or Equalization
+  • Dark images: γ<1 (e.g., 0.5-0.67) or Linear a>1
+  • Normal images: γ≈1 or a≈1.2, small adjustments
+  • Bright images: γ>1 (e.g., 1.5-2.0) or Linear a<1
+  • Very bright images: γ>1 (e.g., 2.0-2.5) or Equalization
+
+================================================================================
+END OF REPORT
+================================================================================
